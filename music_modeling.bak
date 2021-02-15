@@ -21,7 +21,7 @@ one sig C extends PitchClass {}
 one sig G extends PitchClass {}
 one sig D extends PitchClass {}
 
-pred circleOfFifths { -- circle of fifths!
+pred circleOfFifths {
     next = A->E + E->B + B->Fsharp + Fsharp->Csharp + Csharp->Gsharp + Gsharp->Eflat + Eflat->Bflat + Bflat->F + F->C + C->G + G->D + D->A
 }
 
