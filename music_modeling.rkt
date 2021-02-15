@@ -59,7 +59,7 @@ pred basicSound {
     nextnotes.(Note - nextnotes.Note).pclass = Scale.header.next -- makes second to last note '5'
     all n: Note | {
         sum[n.noteLength] > 0
-        sum[n.noteLength] < 3 -- note length control
+        sum[n.noteLength] < 5 -- note length control
         sum[n.octave] > 0
         sum[n.octave] < 3 -- octave control
     }
@@ -94,4 +94,4 @@ pred soundsNotAwful {
 
 run {
     soundsNotAwful
-} for exactly 12 PitchClass, exactly 10 Note, 7 Int
+} for exactly 12 PitchClass, exactly 12 Note, 7 Int
