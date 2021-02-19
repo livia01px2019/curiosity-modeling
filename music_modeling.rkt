@@ -36,52 +36,77 @@ pred pentScale {
     Scale.header = Scale.notes - (Scale.notes).next -- takes the head of the scale
 }
 
-sig Note {
+abstract sig Note {
     pclass: one PitchClass,
     octave: one Int,
     nextnotes: lone Note, -- chain of notes
     noteLength: one Int,
-    noteLengthRun: one Int, -- accumulator for measure purposes
+    noteLengthTotal: one Int, -- accumulator for measure purposes
     var1: one Int 
 }
 
+sig NoteRight extends Note {}
+sig NoteLeft extends Note {}
+
+
 pred wellFormed {
     Note.pclass = Scale.notes -- want only and all notes in the scale
-    Note->Note in *(nextnotes + ~nextnotes) -- connected next chain
-    one Note - Note.nextnotes -- ensures one start in next chain
-    one Note - nextnotes.Note -- ensures one end in next chain
+    (NoteRight->NoteRight + NoteLeft->NoteLeft) in *(nextnotes + ~nextnotes) -- connected next chain
+    one NoteRight - NoteRight.nextnotes -- ensures one start in Right next chain
+    one NoteRight - nextnotes.NoteRight -- ensures one end in Right next chain
+    one NoteLeft - NoteLeft.nextnotes -- ensures one start in Left next chain
+    one NoteLeft - nextnotes.NoteLeft -- ensures one end in Left next chain
     no nextnotes & iden -- no self loops in next chain
+    no (NoteRight->NoteLeft + NoteLeft->NoteRight) & nextnotes -- no crossing chains
 }
 
 pred basicSound {
-    (Note - Note.nextnotes).pclass = Scale.header -- makes first note '1'
-    (Note - nextnotes.Note).pclass = Scale.header -- makes last note '1'
-    nextnotes.(Note - nextnotes.Note).pclass = Scale.header.next -- makes second to last note '5'
+    (NoteRight - NoteRight.nextnotes).pclass = Scale.header -- makes first Right note '1'
+    (NoteRight - nextnotes.NoteRight).pclass = Scale.header -- makes last Right note '1'
+    nextnotes.(NoteRight - nextnotes.NoteRight).pclass = Scale.header.next -- makes second to last note '5'
     all n: Note | {
         sum[n.noteLength] > 0
-        sum[n.noteLength] < 5 -- note length control
+        n in NoteRight implies sum[n.noteLength] < 5 -- note length control
+        n in NoteLeft implies sum[n.noteLength] = 4
         sum[n.octave] > 0
         sum[n.octave] < 3 -- octave control
     }
 }
 
 pred variation {
-    (Note - Note.nextnotes).var1 = sing[1] -- initialize first note run
-    all pre, post: Note | pre.nextnotes = post implies {
+    (NoteRight - NoteRight.nextnotes).var1 = sing[1] -- initialize first note run
+    all pre, post: NoteRight | pre.nextnotes = post implies {
+        // pre.pclass != post.pclass -- ULTIMATE VARIATION, DONT USE??
         (pre.pclass = post.pclass and pre.octave = post.octave) implies sum[post.var1] = add[sum[pre.var1], 1] -- same -> add
         else post.var1 = sing[1] -- diff -> new
     }
-    Note = var1.(sing[1]) + var1.(sing[2]) -- ensures only runs of 1 and 2 (of var1)
+    NoteRight = var1.(sing[1]) + var1.(sing[2]) -- ensures only runs of 1 and 2 (of var1)
+    
 }
 
 pred rhythmStuff {
-    (Note - Note.nextnotes).noteLengthRun = (Note - Note.nextnotes).noteLength -- initialize first note run
-    remainder[sum[(Note - nextnotes.Note).noteLengthRun], 4] = 0 -- makes it end on 0 mod 4
+    (NoteRight - NoteRight.nextnotes).noteLengthTotal = (NoteRight - NoteRight.nextnotes).noteLength -- initialize first note run
+    (NoteLeft - NoteLeft.nextnotes).noteLengthTotal = (NoteLeft - NoteLeft.nextnotes).noteLength -- initialize first note run
+    // remainder[sum[(NoteRight - nextnotes.NoteRight).noteLengthTotal], 4] = 0 -- makes it end on 0 mod 4
     all pre, post: Note | pre.nextnotes = post implies {
-        add[sum[pre.noteLengthRun], sum[post.noteLength]] = 4 implies post.noteLengthRun = sing[0]
-        else post.noteLengthRun = sing[add[sum[pre.noteLengthRun], sum[post.noteLength]]]
+        // add[sum[pre.noteLengthTotal], sum[post.noteLength]] = 4 implies post.noteLengthTotal = sing[0]
+        // else 
+        post.noteLengthTotal = sing[add[sum[pre.noteLengthTotal], sum[post.noteLength]]]
     }
+    all i: Int | {
+        (remainder[sum[i], 4] = 0) and (sum[i] <= max[NoteRight.noteLengthTotal] and sum[i] > 0) implies (i in NoteRight.noteLengthTotal)
+    }
+    max[NoteRight.noteLengthTotal] = max[NoteLeft.noteLengthTotal]
 }
+    // max(noteLengthTotal) == 0 mod 4
+    // int - (1 2 3) ==> (3 6 9)
+    // sig allthefours:
+    // set ints
+    // allthefours: #items == noteLengthTotal/4
+    // all items in allthefours == 0 mod 4  and  < noteLengthTotal/4
+    // every add => 
+    // (sing[0] + sing[4] + ... ) in Note.noteLengthTotal
+    // all I: int st i % 4 == 0 and i< notelength run : i in note
 
 pred soundsNotAwful {
     circleOfFifths
@@ -94,4 +119,4 @@ pred soundsNotAwful {
 
 run {
     soundsNotAwful
-} for exactly 12 PitchClass, exactly 12 Note, 7 Int
+} for exactly 12 PitchClass, exactly 16 Note, 7 Int

@@ -44,7 +44,7 @@ const pitches = {C: 261.63, Csharp: 277.18, D: 293.66, Eflat: 311.13, E: 329.63,
   Fsharp: 369.99, G: 392.00, Gsharp: 415.30, A: 440.00, Bflat: 466.16, B: 493.88}; // pitch dictionary
 
 var ourContext = new AudioContext(); // must initialize 1 universal context for audio nodes
-const lengthModifier = 0.5; // converts length to seconds
+const lengthModifier = 0.375; // converts length to seconds
 
 function playTone(freq, startTime, endTime) {
   tempOscillator = ourContext.createOscillator(); // need a new oscillator every time
