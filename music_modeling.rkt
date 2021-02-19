@@ -41,8 +41,7 @@ sig Note {
     octave: one Int,
     nextnotes: lone Note, -- chain of notes
     noteLength: one Int,
-    noteLengthRun: one Int, -- accumulator for measure purposes
-    var1: one Int 
+    noteLengthRun: one Int -- accumulator for measure purposes
 }
 
 pred wellFormed {
@@ -66,12 +65,9 @@ pred basicSound {
 }
 
 pred variation {
-    (Note - Note.nextnotes).var1 = sing[1] -- initialize first note run
     all pre, post: Note | pre.nextnotes = post implies {
-        (pre.pclass = post.pclass and pre.octave = post.octave) implies sum[post.var1] = add[sum[pre.var1], 1] -- same -> add
-        else post.var1 = sing[1] -- diff -> new
+        not (pre.pclass = post.pclass and pre.octave = post.octave)
     }
-    Note = var1.(sing[1]) + var1.(sing[2]) -- ensures only runs of 1 and 2 (of var1)
 }
 
 pred rhythmStuff {
