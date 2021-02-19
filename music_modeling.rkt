@@ -38,7 +38,9 @@ pred pentScale {
 
 sig Note {
     pclass: one PitchClass,
+    accompanyP: one PitchClass,
     octave: one Int,
+    accompanyO: one Int,
     nextnotes: lone Note, -- chain of notes
     noteLength: one Int,
     noteLengthRun: one Int -- accumulator for measure purposes
@@ -46,6 +48,7 @@ sig Note {
 
 pred wellFormed {
     Note.pclass = Scale.notes -- want only and all notes in the scale
+    Note.accompanyP in Scale.notes -- accompaniment should be in key
     Note->Note in *(nextnotes + ~nextnotes) -- connected next chain
     one Note - Note.nextnotes -- ensures one start in next chain
     one Note - nextnotes.Note -- ensures one end in next chain
@@ -58,15 +61,18 @@ pred basicSound {
     nextnotes.(Note - nextnotes.Note).pclass = Scale.header.next -- makes second to last note '5'
     all n: Note | {
         sum[n.noteLength] > 0
-        sum[n.noteLength] < 5 -- note length control
+        sum[n.noteLength] < 3 -- note length control
         sum[n.octave] > 0
         sum[n.octave] < 3 -- octave control
+        sum[n.accompanyO] = subtract[sum[n.octave], 1] -- accompaniment is lower
+        (n.pclass != n.accompanyP.next.next) and (n.accompanyP != n.pclass.next.next)
     }
 }
 
 pred variation {
     all pre, post: Note | pre.nextnotes = post implies {
-        not (pre.pclass = post.pclass and pre.octave = post.octave)
+        not (pre.pclass = post.pclass and pre.octave = post.octave) -- no doubling main
+        not (pre.accompanyP = post.accompanyP and pre.accompanyO = post.accompanyO) -- no doubling accompaniment
     }
 }
 
