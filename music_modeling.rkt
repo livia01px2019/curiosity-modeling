@@ -74,6 +74,64 @@ pred noteVariation {
     }
 }
 
+test expect {
+    someVariation: noteVariation for exactly 12 PitchClass, 7 Int for {A = A0
+    E = E0
+    B = B0
+    Fsharp = Fsharp0
+    Csharp = Csharp0
+    Gsharp = Gsharp0
+    Eflat = Eflat0
+    Bflat = Bflat0
+    F = F0
+    C = C0
+    G = G0
+    D = D0
+    PitchClass = A0+E0+B0+Fsharp0+Csharp0+Gsharp0+Eflat0+Bflat0+F0+C0+G0+D0
+    next = A0->E0 + E0->B0 + B0->Fsharp0 + Fsharp0->Csharp0 + 
+            Csharp0->Gsharp0 + Gsharp0->Eflat0 + Eflat0->Bflat0 + 
+            Bflat0->F0 + F0->C0 + C->G0 + G0->D0 + D0->A0
+    Scale = Scale0
+    notes = Scale0->(A0 + E0 + B0 + Fsharp0 + Csharp0)
+    header = Scale0->A0
+    Note = Note1+Note2+Note3+Note4
+    nextnotes = Note1->Note2 + Note2->Note3 + Note3->Note4
+    pclass = Note1->A0 + Note2->A0 + Note3->Fsharp0 + Note4->Csharp0
+    accompanyP = Note1->E0 + Note2->Fsharp0 + Note3->Csharp0 + Note4->Fsharp0
+    octave = Note1->sing[1] + Note2->sing[2] + Note3->sing[1] + Note4->sing[1]
+    accompanyO = Note1->sing[0] + Note2->sing[0] + Note3->sing[0] + Note4->sing[0]
+    noteLength = Note1->sing[1] + Note2->sing[2] + Note3->sing[1] + Note4->sing[2]} is sat
+}
+
+test expect {
+    doublingNotes: noteVariation for exactly 12 PitchClass, 7 Int for {A = A0
+    E = E0
+    B = B0
+    Fsharp = Fsharp0
+    Csharp = Csharp0
+    Gsharp = Gsharp0
+    Eflat = Eflat0
+    Bflat = Bflat0
+    F = F0
+    C = C0
+    G = G0
+    D = D0
+    PitchClass = A0+E0+B0+Fsharp0+Csharp0+Gsharp0+Eflat0+Bflat0+F0+C0+G0+D0
+    next = A0->E0 + E0->B0 + B0->Fsharp0 + Fsharp0->Csharp0 + 
+            Csharp0->Gsharp0 + Gsharp0->Eflat0 + Eflat0->Bflat0 + 
+            Bflat0->F0 + F0->C0 + C->G0 + G0->D0 + D0->A0
+    Scale = Scale0
+    notes = Scale0->(A0 + E0 + B0 + Fsharp0 + Csharp0)
+    header = Scale0->A0
+    Note = Note1+Note2+Note3+Note4
+    nextnotes = Note1->Note2 + Note2->Note3 + Note3->Note4
+    pclass = Note1->A0 + Note2->B0 + Note3->Fsharp0 + Note4->Fsharp0
+    accompanyP = Note1->E0 + Note2->Fsharp0 + Note3->Csharp0 + Note4->Fsharp0
+    octave = Note1->sing[1] + Note2->sing[1] + Note3->sing[1] + Note4->sing[1]
+    accompanyO = Note1->sing[1] + Note2->sing[1] + Note3->sing[1] + Note4->sing[1]
+    noteLength = Note1->sing[2] + Note2->sing[1] + Note3->sing[1] + Note4->sing[2]} is unsat
+}
+
 pred rhythm {
     (Note - Note.nextnotes).noteLengthRun = (Note - Note.nextnotes).noteLength -- initialize first note run
     remainder[sum[(Note - nextnotes.Note).noteLengthRun], 4] = 0 -- makes it end on 0 mod 4
@@ -83,6 +141,66 @@ pred rhythm {
         else post.noteLengthRun = sing[add[sum[pre.noteLengthRun], sum[post.noteLength]]]
     }
     sum[(Note - nextnotes.Note).noteLength] > 1 -- make the last note longer
+}
+
+test expect {
+    rhythmOK: rhythm for exactly 12 PitchClass, 7 Int for {A = A0
+    E = E0
+    B = B0
+    Fsharp = Fsharp0
+    Csharp = Csharp0
+    Gsharp = Gsharp0
+    Eflat = Eflat0
+    Bflat = Bflat0
+    F = F0
+    C = C0
+    G = G0
+    D = D0
+    PitchClass = A0+E0+B0+Fsharp0+Csharp0+Gsharp0+Eflat0+Bflat0+F0+C0+G0+D0
+    next = A0->E0 + E0->B0 + B0->Fsharp0 + Fsharp0->Csharp0 + 
+            Csharp0->Gsharp0 + Gsharp0->Eflat0 + Eflat0->Bflat0 + 
+            Bflat0->F0 + F0->C0 + C->G0 + G0->D0 + D0->A0
+    Scale = Scale0
+    notes = Scale0->(A0 + E0 + B0 + Fsharp0 + Csharp0)
+    header = Scale0->A0
+    Note = Note1+Note2+Note3+Note4
+    nextnotes = Note1->Note2 + Note2->Note3 + Note3->Note4
+    pclass = Note1->A0 + Note2->A0 + Note3->Fsharp0 + Note4->Csharp0
+    accompanyP = Note1->E0 + Note2->Fsharp0 + Note3->Csharp0 + Note4->Fsharp0
+    octave = Note1->sing[1] + Note2->sing[2] + Note3->sing[1] + Note4->sing[1]
+    accompanyO = Note1->sing[0] + Note2->sing[0] + Note3->sing[0] + Note4->sing[0]
+    noteLength = Note1->sing[2] + Note2->sing[2] + Note3->sing[2] + Note4->sing[2]
+    noteLengthRun = Note1->sing[2] + Note2->sing[0] + Note3->sing[2] + Note4->sing[0]} is sat
+}
+
+test expect {
+    evenButNotMeasured: rhythm for exactly 12 PitchClass, 7 Int for {A = A0
+    E = E0
+    B = B0
+    Fsharp = Fsharp0
+    Csharp = Csharp0
+    Gsharp = Gsharp0
+    Eflat = Eflat0
+    Bflat = Bflat0
+    F = F0
+    C = C0
+    G = G0
+    D = D0
+    PitchClass = A0+E0+B0+Fsharp0+Csharp0+Gsharp0+Eflat0+Bflat0+F0+C0+G0+D0
+    next = A0->E0 + E0->B0 + B0->Fsharp0 + Fsharp0->Csharp0 + 
+            Csharp0->Gsharp0 + Gsharp0->Eflat0 + Eflat0->Bflat0 + 
+            Bflat0->F0 + F0->C0 + C->G0 + G0->D0 + D0->A0
+    Scale = Scale0
+    notes = Scale0->(A0 + E0 + B0 + Fsharp0 + Csharp0)
+    header = Scale0->A0
+    Note = Note1+Note2+Note3+Note4
+    nextnotes = Note1->Note2 + Note2->Note3 + Note3->Note4
+    pclass = Note1->A0 + Note2->A0 + Note3->Fsharp0 + Note4->Csharp0
+    accompanyP = Note1->E0 + Note2->Fsharp0 + Note3->Csharp0 + Note4->Fsharp0
+    octave = Note1->sing[1] + Note2->sing[2] + Note3->sing[1] + Note4->sing[1]
+    accompanyO = Note1->sing[0] + Note2->sing[0] + Note3->sing[0] + Note4->sing[0]
+    noteLength = Note1->sing[2] + Note2->sing[1] + Note3->sing[2] + Note4->sing[1]
+    noteLengthRun = Note1->sing[2] + Note2->sing[3] + Note3->sing[5] + Note4->sing[6]} is unsat
 }
 
 pred soundsNotAwful {
