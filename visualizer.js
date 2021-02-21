@@ -63,3 +63,20 @@ function playTheNotes(noteScore) {
 }
 
 playTheNotes(noteInfo); // finally play everything!
+
+
+// Text visualization
+div.replaceChildren(); // clear page
+const pre = document.createElement('pre'); // initialize
+
+// produces the text to be displayed
+pre.textContent = noteInfo.map(l => "Main hand: " + l[0].substring(0, l[0].length - 1) + " " +
+  "(Octave " + l[1] + ");" + ' ' + "Accompaniment: " + l[3].substring(0, l[3].length - 1) + " " +
+  "(Octave " + l[4] + ");" + ' ' + "Length of " + l[2] + ".").join('\n\n');
+
+// formatting the page
+pre.style.margin = '2em';
+pre.style.padding = '0.5em';
+pre.style.border = '3px solid black';
+pre.style.display = 'inline-block';
+div.appendChild(pre); // render everything
