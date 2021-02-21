@@ -1,10 +1,5 @@
 #lang forge
 
-option solver MiniSatProver
-option logtranslation 1
-option coregranularity 1
-option core_minimization rce
-
 abstract sig PitchClass {
     next: one PitchClass
 }
@@ -22,7 +17,8 @@ one sig G extends PitchClass {}
 one sig D extends PitchClass {}
 
 pred circleOfFifths { -- circle of fifths!
-    next = A->E + E->B + B->Fsharp + Fsharp->Csharp + Csharp->Gsharp + Gsharp->Eflat + Eflat->Bflat + Bflat->F + F->C + C->G + G->D + D->A
+    next = A->E + E->B + B->Fsharp + Fsharp->Csharp + Csharp->Gsharp + 
+            Gsharp->Eflat + Eflat->Bflat + Bflat->F + F->C + C->G + G->D + D->A
 }
 
 one sig Scale {
@@ -64,25 +60,29 @@ pred basicSound {
         sum[n.noteLength] < 3 -- note length control
         sum[n.octave] > 0
         sum[n.octave] < 3 -- octave control
+
         sum[n.accompanyO] = subtract[sum[n.octave], 1] -- accompaniment is lower
-        (n.pclass != n.accompanyP.next.next) and (n.accompanyP != n.pclass.next.next)
+        (n.pclass != n.accompanyP.next.next) and (n.accompanyP != n.pclass.next.next) 
+        -- accompaniment is not 2 hops away from main (sounds dissonant)
     }
 }
 
-pred variation {
+pred noteVariation {
     all pre, post: Note | pre.nextnotes = post implies {
         not (pre.pclass = post.pclass and pre.octave = post.octave) -- no doubling main
         not (pre.accompanyP = post.accompanyP and pre.accompanyO = post.accompanyO) -- no doubling accompaniment
     }
 }
 
-pred rhythmStuff {
+pred rhythm {
     (Note - Note.nextnotes).noteLengthRun = (Note - Note.nextnotes).noteLength -- initialize first note run
     remainder[sum[(Note - nextnotes.Note).noteLengthRun], 4] = 0 -- makes it end on 0 mod 4
     all pre, post: Note | pre.nextnotes = post implies {
-        add[sum[pre.noteLengthRun], sum[post.noteLength]] = 4 implies post.noteLengthRun = sing[0]
+        add[sum[pre.noteLengthRun], sum[post.noteLength]] = 4 implies post.noteLengthRun = sing[0] 
+        -- reset noteLengthRun back to 0 when 4 is reached, ensuring notes are divided into measures
         else post.noteLengthRun = sing[add[sum[pre.noteLengthRun], sum[post.noteLength]]]
     }
+    sum[(Note - nextnotes.Note).noteLength] > 1 -- make the last note longer
 }
 
 pred soundsNotAwful {
@@ -90,8 +90,8 @@ pred soundsNotAwful {
     pentScale
     wellFormed
     basicSound
-    variation
-    rhythmStuff
+    noteVariation
+    rhythm
 }
 
 run {
