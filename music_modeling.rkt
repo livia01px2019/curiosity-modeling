@@ -70,7 +70,8 @@ pred basicSound {
 pred noteVariation {
     all pre, post: Note | pre.nextnotes = post implies {
         not (pre.pclass = post.pclass and pre.octave = post.octave) -- no doubling main
-        not (pre.accompanyP = post.accompanyP and pre.accompanyO = post.accompanyO) -- no doubling accompaniment
+        not (pre.accompanyP = post.accompanyP and pre.accompanyO = post.accompanyO) 
+        -- no doubling accompaniment
     }
 }
 
