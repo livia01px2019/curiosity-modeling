@@ -38,7 +38,6 @@ function playTone(freqMain, freqAccompany, startTime, endTime) {
   tempOscillatorAccompany.connect(ourContextAccompany.destination); 
   tempOscillatorAccompany.start(startTime);
   tempOscillatorAccompany.stop(endTime);
-
 }
 
 function playTheNotes(noteScore) {

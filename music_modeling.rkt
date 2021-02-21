@@ -176,6 +176,10 @@ sig Note {
     noteLengthRun: one Int -- accumulator for measure purposes
 }
 
+sig NoteRight extends Note {}
+sig NoteLeft extends Note {}
+
+
 pred wellFormed {
     Note.pclass = Scale.notes -- want only and all notes in the scale
     Note.accompanyP in Scale.notes -- accompaniment should be in key
@@ -183,6 +187,7 @@ pred wellFormed {
     one Note - Note.nextnotes -- ensures one start in next chain
     one Note - nextnotes.Note -- ensures one end in next chain
     no nextnotes & iden -- no self loops in next chain
+    no (NoteRight->NoteLeft + NoteLeft->NoteRight) & nextnotes -- no crossing chains
 }
 
 inst correctWellFormed {
@@ -257,9 +262,9 @@ test expect {
 }
 
 pred basicSound {
-    (Note - Note.nextnotes).pclass = Scale.header -- makes first note '1'
-    (Note - nextnotes.Note).pclass = Scale.header -- makes last note '1'
-    nextnotes.(Note - nextnotes.Note).pclass = Scale.header.next -- makes second to last note '5'
+    (NoteRight - NoteRight.nextnotes).pclass = Scale.header -- makes first Right note '1'
+    (NoteRight - nextnotes.NoteRight).pclass = Scale.header -- makes last Right note '1'
+    nextnotes.(NoteRight - nextnotes.NoteRight).pclass = Scale.header.next -- makes second to last note '5'
     all n: Note | {
         sum[n.noteLength] > 0
         sum[n.noteLength] < 3 -- note length control
@@ -498,4 +503,4 @@ pred soundsNotAwful {
 
 run {
     soundsNotAwful
-} for exactly 12 PitchClass, exactly 12 Note, 7 Int
+} for exactly 12 PitchClass, exactly 16 Note, 7 Int
